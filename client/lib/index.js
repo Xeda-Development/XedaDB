@@ -43,13 +43,16 @@ class Client {
     }
 
     async onConnect() {
-        const client = this.client;
+        const client = this.conn;
 
         log(`> Connected to ${this.ip}:${this.port}`);
+
+        this.conn.write(pack.encode('ACK', ['CONN']))
     }
 
     async onData(data) {
-        console.log('data: ', data)
+        console.log('data: ', data);
+        this.conn.write(pack.encode('ACK', [data[0]]))
     }
 }
 
