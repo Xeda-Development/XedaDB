@@ -2,6 +2,7 @@ const fs = require('fs');
 const yaml = require('js-yaml');
 const net = require('net');
 const pack = require("msgpack-lite");
+const Client = require('./client');
 
 const CONSTANTS = require('./CONSTANTS');
 
@@ -28,21 +29,28 @@ function loadConfig(filePath) {
 
 function startTCPServer(ip, port) {
   const server = net.createServer((socket) => {
-    console.log('Client connected');
+    var IP = `${socket.address().address}:${socket.address().port}`;
+    console.log(IP + ' Client connected');
+
+    var s;
+    s = this;
+
+    const client = new Client(s, socket);
 
     socket.on('data', (data) => {
       try {
         data = pack.decode(data);
 
-        console.log(data);
+        client.onData(data);
       } catch(e) {
         socket.write('Error: ' + String(e));
+
         socket.end();
       }
     });
 
     socket.on('end', () => {
-      console.log('Client closed');
+      console.log('Client '+IP+' closed');
     });
   });
 
