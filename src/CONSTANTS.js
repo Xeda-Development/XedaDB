@@ -1,6 +1,6 @@
 var config = {};
 
-config.BaseDir = '/etc/xedadb';
-config.ConfigPath = config.BaseDir + '/config.yml';
+config.BaseDir = __dirname
+config.ConfigPath = config.BaseDir + '/../conf/config.yml';
 
 module.exports = config;
