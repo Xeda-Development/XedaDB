@@ -1,2 +1,2 @@
 # XedaDB
-This is a No-SQL Database
+This is a No-SQL Database software proghrammed in NodeJS
