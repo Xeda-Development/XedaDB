@@ -9,34 +9,47 @@ const MyNoSQLDB = {
     ],
   
     // Index for quick lookup by user name
-    indexByID: {},
+    indexByName: {},
   };
   
   // Function to create an index on a specific field
   function createIndex(collection, fieldName) {
     const index = {};
+
+    var i;
+    i = 0;
   
     // Populate the index
     collection.forEach((document) => {
       const key = document[fieldName];
-      if (!index[key]) {
-        index[key] = [];
-      }
-      index[key].push(document);
+      console.log(`Index ${i}`, document.id, key)
+    //   if (!index[key]) {
+    //     index[key] = [];
+    //   }
+    //   index[key].push(document);
+    if (!index[key]) index[key] = [];
+
+    index[key].push(i);
+      i++;
     });
   
     return index;
   }
   
   // Create an index on the 'name' field for the 'users' collection
-  MyNoSQLDB.indexByID = createIndex(MyNoSQLDB.users, 'id');
+  MyNoSQLDB.indexByName = createIndex(MyNoSQLDB.users, 'name');
   
   // Function to perform a quick lookup using an index
   function findByField(collection, index, fieldName, value) {
     const entries = index[value];
     if (entries) {
       // Return the matching entries
-      return entries;
+      var res;
+      res = [];
+      for (let a=0; a<entries.length; a++) {
+        res.push(collection[a])
+      }
+      return res;
     } else {
       // No matching entries found
       return [];
@@ -44,6 +57,6 @@ const MyNoSQLDB = {
   }
   
   // Example: Find users with the name 'Bob' using the index
-  const results = findByField(MyNoSQLDB.users, MyNoSQLDB.indexByID, 'id', '1');
+  const results = findByField(MyNoSQLDB.users, MyNoSQLDB.indexByName, 'name', 'Bob');
   console.log('data:', JSON.stringify(MyNoSQLDB, null, 2))
   console.log('results:', results);
