@@ -1,6 +1,7 @@
 const fs = require('fs');
 const yaml = require('js-yaml');
 const net = require('net');
+const pack = require("msgpack-lite");
 
 const CONSTANTS = require('./CONSTANTS');
 
@@ -30,7 +31,14 @@ function startTCPServer(ip, port) {
     console.log('Client connected');
 
     socket.on('data', (data) => {
-      console.log(`Received data from client: ${data}`);
+      try {
+        data = pack.decode(data);
+
+        console.log(data);
+      } catch(e) {
+        socket.write('Error: ' + String(e));
+        socket.end();
+      }
     });
 
     socket.on('end', () => {
