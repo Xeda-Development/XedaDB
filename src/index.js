@@ -39,8 +39,7 @@ function startTCPServer(ip, port) {
   });
 
   server.on('error', (error) => {
-    console.error('Server err:', error.message);
-    process.exit(1);
+    handleError('Failed to start TCP server', error, true)
   });
 
   server.listen(port, ip, () => {
@@ -48,7 +47,6 @@ function startTCPServer(ip, port) {
   });
 }
 
-const configFilePath = 'config.yml';
 const config = loadConfig(configFilePath);
 
 startTCPServer(config.server.ip, config.server.port);
