@@ -47,6 +47,6 @@ function startTCPServer(ip, port) {
   });
 }
 
-const config = loadConfig(configFilePath);
+const config = loadConfig(CONSTANTS.ConfigPath);
 
 startTCPServer(config.server.ip, config.server.port);
