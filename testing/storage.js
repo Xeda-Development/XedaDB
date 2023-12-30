@@ -101,21 +101,28 @@ function createPartitionedIndex(collection, fieldName, numPartitions) {
 
 // Function to perform a quick lookup using the partitioned hash-based index with MD5 hashing
 function findByFieldPartitioned(collection, partitionFiles, fieldName, value) {
-  const hash = crypto.createHash('md5').update(value).digest('hex');
-  const partition = Math.abs(hash.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)) % partitionFiles.length;
-  const partitionFilePath = partitionFiles[partition]; // Get the specific file path for the partition
-  const partitionData = loadPartitionFromDisk(partitionFilePath);
-  const entries = partitionData[hash];
-
-  if (entries) {
-    // Return the matching entries
-    const results = entries.map((index) => collection[index]);
-    return results;
-  } else {
-    // No matching entries found
-    return [];
+    console.log('Search value:', value); // Debug: Log search value
+    const hash = crypto.createHash('md5').update(value).digest('hex');
+    console.log('Search value hash:', hash); // Debug: Log hashed search value
+    const partition = Math.abs(hash.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)) % partitionFiles.length;
+    console.log('Selected partition:', partition); // Debug: Log selected partition
+    const partitionFilePath = `partition_${partition}.json`;// Get the specific file path for the partition
+    console.log('Partition file path:', partitionFilePath); // Debug: Log partition file path
+    const partitionData = loadPartitionFromDisk(partitionFilePath);
+    console.log('Partition data:', partitionData); // Debug: Log partition data
+    const entries = partitionData[hash];
+    console.log('Entries in partition:', entries); // Debug: Log entries in the partition
+  
+    if (entries) {
+      // Return the matching entries
+      const results = entries.map((index) => collection[index]);
+      return results;
+    } else {
+      // No matching entries found
+      return [];
+    }
   }
-}
+  
 
 // Example: Find users with the name 'Bob' using the partitioned hash-based index with MD5 hashing
 const resultsPartitioned = findByFieldPartitioned(
