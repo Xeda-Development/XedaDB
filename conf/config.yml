@@ -1,3 +1,8 @@
+# Server and networking settings
 server:
+  # The IP the server should listen on.
   ip: '127.0.0.1'
+  # ip: "0.0.0.0" # Use only if you know what you are doing. This will let other computers connect to the database!
+
+  # The port the server should use.
   port: 1895
