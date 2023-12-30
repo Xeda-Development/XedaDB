@@ -28,12 +28,17 @@ loadIndexFromPartitions();
 // Function to create an index based on a specific property
 function createIndex(property) {
   index[property] = {};
+
   for (let i = 0; i < database.length; i++) {
     let entry = database[i];
     if (!index[property][entry[property]]) {
       index[property][entry[property]] = [];
     }
-    index[property][entry[property]].push(entry);
+
+    const partitionNumber = Math.floor(i / partitionSizeLimit) + 1; // Get partition number
+    if (!index[property][entry[property]].includes(partitionNumber)) {
+      index[property][entry[property]].push(partitionNumber);
+    }
   }
 }
 
@@ -61,14 +66,7 @@ function loadIndexFromPartitions() {
     if (fs.existsSync(indexPartitionFilename)) {
       const data = fs.readFileSync(indexPartitionFilename, "utf8");
       const parsedData = JSON.parse(data);
-      const partitionedIndex = {};
-
-      parsedData.forEach((partition) => {
-        const partitionKey = Object.keys(partition)[0];
-        partitionedIndex[partitionKey] = partition[partitionKey];
-      });
-
-      index[key] = partitionedIndex;
+      index[key] = parsedData;
       console.log(`Index partition for ${key} loaded from ${indexPartitionFilename}`);
     }
   });
@@ -83,10 +81,16 @@ function queryByProperty(property, value) {
   }
 
   if (index[property] && index[property][value]) {
-    const result = index[property][value];
-    cache[cacheKey] = result;
+    const partitions = index[property][value];
+    const results = partitions.flatMap(partitionNumber => {
+      const partitionFilename = `partition_${partitionNumber}.json`;
+      const partitionData = JSON.parse(fs.readFileSync(partitionFilename, 'utf8'));
+      return partitionData.filter(entry => entry[property] === value);
+    });
+
+    cache[cacheKey] = results;
     console.log("Data retrieved from database and cached.");
-    return result;
+    return results;
   }
 
   return [];
@@ -136,21 +140,16 @@ function partitionIndex() {
 
   indexKeys.forEach((key) => {
     const currentKeyIndex = index[key];
-    const keys = Object.keys(currentKeyIndex);
-    const indexPartitions = [];
+    const indexPartitions = {};
 
-    keys.forEach((innerKey) => {
-      const entries = currentKeyIndex[innerKey];
-      const numEntries = entries.length;
-      const numIndexPartitions = Math.ceil(numEntries / partitionSizeLimit);
-
-      for (let i = 0; i < numIndexPartitions; i++) {
-        const start = i * partitionSizeLimit;
-        const end = Math.min(start + partitionSizeLimit, numEntries);
-        const partitionedEntries = entries.slice(start, end);
-        indexPartitions.push({ [innerKey]: partitionedEntries });
-      }
-    });
+    for (const propertyValue in currentKeyIndex) {
+      indexPartitions[propertyValue] = currentKeyIndex[propertyValue].reduce((acc, partitionNumber) => {
+        if (!acc.includes(partitionNumber)) {
+          acc.push(partitionNumber);
+        }
+        return acc;
+      }, []);
+    }
 
     const indexPartitionFilename = `index_partition_${key}.json`;
     fs.writeFileSync(indexPartitionFilename, JSON.stringify(indexPartitions));
@@ -178,9 +177,9 @@ function loadPartitions() {
 }
 
 // Trigger partitioning after adding an entry to the database
-createEntry({ id: Date.now(), name: "Pizza", age: 29 }); // Create
+createEntry({ id: Date.now(), name: "Carl", age: 29 }); // Create
 
-console.log('query:', queryByProperty('name', 'Pizza'));
+console.log('query:', queryByProperty('name', 'Max'));
 
 // Save the partitions to disk
 partitionDatabase();
