@@ -56,7 +56,7 @@ app.ws('/', function(ws, req) {
   const client = new Client(app, ws);
 
    ws.on('close', () => {
-    console.log('Client '+IP+' closed');
+    console.log('Client '+IP+' disconnected');
   });
 
   ws.on('message', function(data) {
