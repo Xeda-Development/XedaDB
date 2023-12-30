@@ -17,8 +17,8 @@ class Client {
         const client = new WebSocket(url);
         this.client = client;
         
-        client.on('error', (e1, e2) => {
-            console.error('WS error:', e1, e2)
+        client.on('error', (error) => {
+            console.error('WS error:', error)
         });
         client.on('open', function open() {
             log('> Connection opened!')
