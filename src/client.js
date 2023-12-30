@@ -1,22 +1,14 @@
 const pack = require("msgpack-lite");
 
 class DBClient {
-    constructor(server, socket) {
-        this.server = server;
-        this.socket = socket;
+    constructor(app, ws) {
+        this.app = app;
+        this.ws = ws;
+        this.req = ws.req;
 
-        this.socket.on('drain', (e) => {
-            console.log('dr', e);
-        })
+        this.cmdId = 0;
 
-        this.canSendOK = null;
-        var a;
-        a = this;
-        this.canSend = new Promise(resolve => {
-            a.canSendOK = resolve;
-        });
-
-        this.ID = Math.floor(Math.random() * 1000);
+        this.ID = Math.floor(Math.random() * 1000000);
         this.changeState('PRE');
 
         console.log('mau')
@@ -26,7 +18,6 @@ class DBClient {
             this.ID,
             this.state
         ]);
-        console.log('send');
     }
 
     changeState(state) {
@@ -35,21 +26,19 @@ class DBClient {
     }
 
     onData(data) {
-        console.log(`> [${this.ID}] Got data from ${this.socket.address().address}:${this.socket.address().port}: ${json.stringify(data)}`);
-
-        this.canSend(true)
+        console.log(`> [${this.ID}] Got data from ${this.req.ip}: ${JSON.stringify(data)}`);
     }
 
     async sendPacket(packetId, args) {
-        await this.canSendOK == true;
         if (!packetId) packetId = 'UNKNOWN';
         if (!args) args = [];
-        if (this.socket.destroyed) return;
-        this.socket.write(pack.encode([
+        this.cmdId++;
+        this.ws.send(pack.encode([
             packetId,
+            this.cmdId,
             args
         ]));
-        console.log(`> Sent packet ${packetId} to ${this.ID}`)
+        console.log(`> Sent packet ${packetId} (${this.cmdId}) to ${this.ID}`)
     }
 
 
