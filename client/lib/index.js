@@ -34,6 +34,16 @@ class Client {
         console.warn(`Warning: <Client>.connect() is deprecated`);
     }
 
+    async querySimple(filter) {
+        if (!filter) filter = {};
+        // Todo: filter data
+    }
+
+    async getAll() {
+        // Todo: return data
+        return [];
+    }
+
     async onConnect() {
         const client = this.client;
 

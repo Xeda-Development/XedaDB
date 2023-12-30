@@ -1,4 +1,5 @@
 const Client = require('./lib');
 
-const db = new Client('ws://127.0.0.1:1895', 'ExamplePasswordChangeMe');
-db.connect();
+const db = new Client('ws://n2.meegie.net:3007', 'ExamplePasswordChangeMe');
+var allDocs = db.getAll({}); // Get all documents
+console.log(allDocs);
