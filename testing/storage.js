@@ -42,11 +42,8 @@ let MyNoSQLDB = {
   // Collection for storing user data
   users: [
     { id: 1, name: 'Alice', age: 25 },
-      { id: 2, name: 'Bob', age: 30 },
-      { id: 3, name: 'Charlie', age: 22 },
-      { id: 4, name: 'Max', age: 21 },
-      { id: 5, name: 'Bard', age: 34 },
-      { id: 7, name: 'Carl', age: 16 },
+    { id: 2, name: 'Bob', age: 30 },
+    { id: 3, name: 'Charlie', age: 22 },
     // ... more user documents
   ],
 
@@ -73,6 +70,15 @@ if (fs.existsSync(dataFilePath)) {
     MyNoSQLDB.hashIndexPartitions.push(fileName);
   }
 
+  console.log('Partitioned Data:', partitionedData); // Debug: Log partitioned data
+  
+  // Create partitioned hash-based index on the partitioned data
+  MyNoSQLDB.hashIndexPartitions = partitionedData.map((partition) =>
+    createPartitionedIndex(partition, 'name', numPartitions)
+  );
+
+  console.log('Partitioned Indexes:', MyNoSQLDB.hashIndexPartitions); // Debug: Log partitioned indexes
+  
   // Save the initial data info (file names) to disk
   saveDataToDisk(MyNoSQLDB, dataFilePath);
 }
@@ -97,7 +103,7 @@ function createPartitionedIndex(collection, fieldName, numPartitions) {
 function findByFieldPartitioned(collection, partitionFiles, fieldName, value) {
   const hash = crypto.createHash('md5').update(value).digest('hex');
   const partition = Math.abs(hash.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)) % partitionFiles.length;
-  const partitionFilePath = `partition_${partition}.json`; // Get the specific file path for the partition
+  const partitionFilePath = partitionFiles[partition]; // Get the specific file path for the partition
   const partitionData = loadPartitionFromDisk(partitionFilePath);
   const entries = partitionData[hash];
 
@@ -114,7 +120,7 @@ function findByFieldPartitioned(collection, partitionFiles, fieldName, value) {
 // Example: Find users with the name 'Bob' using the partitioned hash-based index with MD5 hashing
 const resultsPartitioned = findByFieldPartitioned(
   MyNoSQLDB.users,
-  MyNoSQLDB.hashIndexPartitions, // Pass the array of file paths here
+  MyNoSQLDB.hashIndexPartitions,
   'name',
   'Bob'
 );

@@ -1,9 +1,0 @@
-{
-  "users": [],
-  "indexByName": {},
-  "hashIndexPartitions": [
-    "partition_0.json",
-    "partition_1.json",
-    "partition_2.json"
-  ]
-}
