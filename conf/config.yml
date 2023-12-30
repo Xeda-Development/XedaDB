@@ -8,3 +8,5 @@
   server_port: 1895
 
   password: "ExamplePasswordChangeMe"
+
+  storagePath: "/tmp" # Only for testing

@@ -41,6 +41,10 @@ class DBClient {
             case 'AUTH':
                 this.handleAuth(data[1]);
                 break;
+            case 'QUERY_ALL':
+                if (this.isAuthenticated == false || this.state != 'DATA') return this.sendPacket('ERROR', ['INVALID_AUTH-STATE']);
+                this.queryAll();
+                break;
             case 'ACK':
                 // ToDo: make a proper ack system
                 break;
@@ -48,6 +52,10 @@ class DBClient {
                 console.log(`> Unhandled command ${command} received from ${this.ID}`);
                 break;
         }
+    }
+
+    async queryAll() {
+        const basePath = ths.getOption('storagePath');
     }
     
     handleAuth(authData) {
