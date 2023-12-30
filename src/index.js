@@ -52,6 +52,10 @@ app.ws('/', function(ws, req) {
 
   const client = new Client(app, ws);
 
+   ws.on('close', () => {
+    console.log('Client '+IP+' closed');
+  });
+
   ws.on('message', function(data) {
     try {
       data = pack.decode(data);
