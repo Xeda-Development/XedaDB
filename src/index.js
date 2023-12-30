@@ -30,7 +30,19 @@ function loadConfig(filePath) {
   }
 }
 
+function overrideConfigWithCommandLineArgs(config) {
+  const args = process.argv.slice(2);
+  for (let i = 0; i < args.length; i += 2) {
+    const argName = args[i].replace('--', '');
+    const argValue = args[i + 1];
+    config[argName] = argValue;
+    console.log(`> ${argName} is overwritten by CL args`);
+  }
+}
+
 const config = loadConfig(CONSTANTS.ConfigPath);
+
+overrideConfigWithCommandLineArgs(config);
 
 app.ws('/', function(ws, req) {
   ws.req = req;
@@ -39,10 +51,6 @@ app.ws('/', function(ws, req) {
   console.log(IP + ' Client connected');
 
   const client = new Client(app, ws);
-
-  ws.on('close', () => {
-    console.log('Client '+IP+' closed');
-  });
 
   ws.on('message', function(data) {
     try {
@@ -63,7 +71,7 @@ function getOption(name, envName) {
   var res;
   if (config[name]) res = config[name];
   if (process.env[envName]) {
-    console.log(`> Option ${name} is overwritten by env variable ${envName}`);
+    console.log(`> ${name} is overwritten by env variable ${envName}`);
     res = process.env[envName];
   }
   return res;
@@ -72,8 +80,6 @@ function getOption(name, envName) {
 var ip = getOption('server_ip', 'SERVER_IP')
 var port = getOption('server_port', 'SERVER_PORT');
 
-console.log(`> Going to listen on ${ip}:${port}`)
-
 app.listen(port, ip, () => {
-  console.log(`Server listening on ${ip}:${port}`);
+  console.log(`> Server listening on ${ip}:${port}`);
 });
