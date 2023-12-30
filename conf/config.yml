@@ -6,3 +6,5 @@
 
   # The port the server should use.
   server_port: 1895
+
+  password: "ExamplePasswordChangeMe"

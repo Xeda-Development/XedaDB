@@ -38,15 +38,18 @@ function overrideConfigWithCommandLineArgs(config) {
     config[argName] = argValue;
     console.log(`> ${argName} is overwritten by CL args`);
   }
+  return config;
 }
 
-const config = loadConfig(CONSTANTS.ConfigPath);
+var config = loadConfig(CONSTANTS.ConfigPath);
 
-overrideConfigWithCommandLineArgs(config);
+config = overrideConfigWithCommandLineArgs(config);
 
 app.ws('/', function(ws, req) {
   ws.req = req;
   var IP = req.ip;
+
+  req.getOption = getOption;
 
   console.log(IP + ' Client connected');
 
@@ -73,6 +76,8 @@ app.on('error', (error) => {
 
 function getOption(name, envName) {
   var res;
+  if (!config) throw new Error('No config');
+
   if (config[name]) res = config[name];
   if (process.env[envName]) {
     console.log(`> ${name} is overwritten by env variable ${envName}`);

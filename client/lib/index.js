@@ -40,6 +40,10 @@ class Client {
         var a;
         a = this; 
 
+        this.client.send(pack.encode(
+            ['AUTH', [this.password]]
+        ));
+
         client.on('message', function(chunk) {
             if (a.onData) {
                 if (String(chunk).startsWith('Error')) return console.warn(`Server encountered an error! ${String(chunk)}`);
@@ -61,7 +65,7 @@ class Client {
     async onData(data) {
         console.log('data: ', data);
         // this.conn.write(pack.encode('ACK', [data[0]]))
-        this.client.send(pack.encode(['ACK', data[1], data[0]]))
+        this.client.send(pack.encode(['ACK', [data[1], data[0]]]))
     }
 }
 
