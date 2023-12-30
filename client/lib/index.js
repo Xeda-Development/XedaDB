@@ -47,7 +47,11 @@ class Client {
 
         log(`> Connected to ${this.ip}:${this.port}`);
 
-        this.conn.write(pack.encode('ACK', ['CONN']))
+        this.conn.on('drain', (e) => {
+            console.log('dr', e);
+        })
+
+        this.conn.write(pack.encode('ACK', ['CONN']));
     }
 
     async onData(data) {

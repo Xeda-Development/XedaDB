@@ -43,9 +43,9 @@ function startTCPServer(ip, port) {
 
         client.onData(data);
       } catch(e) {
-        socket.write('Error: ' + String(e));
-
-        socket.end();
+        if (socket.destroyed) return;
+        // socket.write('Error: ' + String(e));
+        // socket.end();
       }
     });
 

@@ -5,6 +5,10 @@ class DBClient {
         this.server = server;
         this.socket = socket;
 
+        this.socket.on('drain', (e) => {
+            console.log('dr', e);
+        })
+
         this.canSendOK = null;
         var a;
         a = this;
@@ -40,6 +44,7 @@ class DBClient {
         await this.canSendOK == true;
         if (!packetId) packetId = 'UNKNOWN';
         if (!args) args = [];
+        if (this.socket.destroyed) return;
         this.socket.write(pack.encode([
             packetId,
             args
