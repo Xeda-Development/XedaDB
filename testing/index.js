@@ -19,6 +19,12 @@ let index = {};
 // Cache object to store frequently accessed data
 let cache = {};
 
+// Loading data from partitions instead of database.json
+loadFromPartitions();
+
+// Load index from partitions
+loadIndexFromPartitions();
+
 // Function to create an index based on a specific property
 function createIndex(property) {
   index[property] = {};
@@ -31,29 +37,41 @@ function createIndex(property) {
   }
 }
 
-// Loading data from partitions instead of database.json
-loadFromPartitions();
-
-// Creating index on 'name', 'id', and 'age' properties
-createIndex("name");
-createIndex("id");
-createIndex("age");
-
 // Save index and cache to a file
 function saveToFile() {
   const dataToSave = {
-    index,
     cache,
   };
 
   fs.writeFileSync("database.json", JSON.stringify(dataToSave, null, 2));
-  console.log("Index and cache saved to file.");
+  console.log("Cache saved to file.");
 }
 
 // Load data from partitions to the database
 function loadFromPartitions() {
   const loadedPartitions = loadPartitions();
   database = loadedPartitions.flat(); // Flatten partitions into a single database
+}
+
+// Function to load index from partition files
+function loadIndexFromPartitions() {
+  const indexKeys = ['name', 'id', 'age']; // Modify this according to your indexed properties
+  indexKeys.forEach((key) => {
+    const indexPartitionFilename = `index_partition_${key}.json`;
+    if (fs.existsSync(indexPartitionFilename)) {
+      const data = fs.readFileSync(indexPartitionFilename, "utf8");
+      const parsedData = JSON.parse(data);
+      const partitionedIndex = {};
+
+      parsedData.forEach((partition) => {
+        const partitionKey = Object.keys(partition)[0];
+        partitionedIndex[partitionKey] = partition[partitionKey];
+      });
+
+      index[key] = partitionedIndex;
+      console.log(`Index partition for ${key} loaded from ${indexPartitionFilename}`);
+    }
+  });
 }
 
 // Function to query by indexed property with caching
@@ -87,7 +105,7 @@ function createEntry(entry) {
   createIndex("name");
   createIndex("id");
   createIndex("age"); // Re-create index after insertion
-  saveToFile(); // Save index and cache to file after addition
+  saveToFile(); // Save cache to file after addition
 }
 
 // Function to partition the database and save partitions to disk
@@ -170,5 +188,5 @@ partitionDatabase();
 // Save the index partitions to disk
 partitionIndex();
 
-// Save the index and cache to disk
+// Save the cache to disk
 saveToFile();
