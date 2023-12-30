@@ -36,16 +36,28 @@ class DBClient {
     }
 
     onData(data) {
-        if (data[0] == 'AUTH') {
-            var password = data[1][0];
-            var ServerPasss = this.getOption('password');
-            if (password === ServerPasss) {
-                this.isAuthenticated = true;
-                this.sendPacket('AUTH_OK', []);
-                this.changeState('DATA');
-            } else {
-                this.sendPacket('AUTH_FAIL', ['PasswordInvalid']);
-            }
+        const command = data[0];
+        switch (command) {
+            case 'AUTH':
+                this.handleAuth(data[1]);
+                break;
+    
+            default:
+                console.log(`> Unhandled command ${command} received from ${this.ID}`);
+                break;
+        }
+    }
+    
+    handleAuth(authData) {
+        const password = authData[0];
+        const serverPassword = this.getOption('password');
+    
+        if (password === serverPassword) {
+            this.isAuthenticated = true;
+            this.sendPacket('AUTH_OK', []);
+            this.changeState('DATA');
+        } else {
+            this.sendPacket('AUTH_FAIL', ['PasswordInvalid']);
         }
     }
 
