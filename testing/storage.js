@@ -13,6 +13,18 @@ function loadDataFromDisk(fileName) {
   return JSON.parse(jsonData);
 }
 
+// Function to save partition data to separate files
+function savePartitionToDisk(partition, fileName) {
+  const jsonData = JSON.stringify(partition, null, 2);
+  fs.writeFileSync(fileName, jsonData);
+}
+
+// Function to load partition data from a file
+function loadPartitionFromDisk(fileName) {
+  const jsonData = fs.readFileSync(fileName, 'utf8');
+  return JSON.parse(jsonData);
+}
+
 // Function to partition raw data into specified partitions
 function partitionData(collection, numPartitions) {
   const partitions = Array.from({ length: numPartitions }, () => []);
@@ -30,15 +42,18 @@ let MyNoSQLDB = {
   // Collection for storing user data
   users: [
     { id: 1, name: 'Alice', age: 25 },
-    { id: 2, name: 'Bob', age: 30 },
-    { id: 3, name: 'Charlie', age: 22 },
+      { id: 2, name: 'Bob', age: 30 },
+      { id: 3, name: 'Charlie', age: 22 },
+      { id: 4, name: 'Max', age: 21 },
+      { id: 5, name: 'Bard', age: 34 },
+      { id: 7, name: 'Carl', age: 16 },
     // ... more user documents
   ],
 
   // Index for quick lookup by user name
   indexByName: {},
   // Partitioned hash-based index for quicker lookups
-  hashIndexPartitions: [], // Array to hold partitions
+  hashIndexPartitions: [], // Array to hold partition file names
 };
 
 // Load data from a JSON file if it exists
@@ -49,14 +64,16 @@ if (fs.existsSync(dataFilePath)) {
   // Partition the raw data into 3 partitions
   const numPartitions = 3;
   const partitionedData = partitionData(MyNoSQLDB.users, numPartitions);
-  MyNoSQLDB.users = partitionedData; // Update users with partitioned data
+  MyNoSQLDB.users = []; // Clear users array
+  
+  // Save partitioned data to separate files and store file names in hashIndexPartitions
+  for (let i = 0; i < numPartitions; i++) {
+    const fileName = `partition_${i}.json`;
+    savePartitionToDisk(partitionedData[i], fileName);
+    MyNoSQLDB.hashIndexPartitions.push(fileName);
+  }
 
-  // Create partitioned hash-based index on the partitioned data
-  MyNoSQLDB.hashIndexPartitions = partitionedData.map((partition) =>
-    createPartitionedIndex(partition, 'name', numPartitions)
-  );
-
-  // Save the initial data to disk
+  // Save the initial data info (file names) to disk
   saveDataToDisk(MyNoSQLDB, dataFilePath);
 }
 
@@ -77,11 +94,12 @@ function createPartitionedIndex(collection, fieldName, numPartitions) {
 }
 
 // Function to perform a quick lookup using the partitioned hash-based index with MD5 hashing
-function findByFieldPartitioned(collection, partitions, fieldName, value) {
+function findByFieldPartitioned(collection, partitionFiles, fieldName, value) {
   const hash = crypto.createHash('md5').update(value).digest('hex');
-  const partition = Math.abs(hash.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)) % partitions.length;
-  const partitionIndex = partitions[partition];
-  const entries = partitionIndex[hash];
+  const partition = Math.abs(hash.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)) % partitionFiles.length;
+  const partitionFilePath = `partition_${partition}.json`; // Get the specific file path for the partition
+  const partitionData = loadPartitionFromDisk(partitionFilePath);
+  const entries = partitionData[hash];
 
   if (entries) {
     // Return the matching entries
@@ -95,8 +113,8 @@ function findByFieldPartitioned(collection, partitions, fieldName, value) {
 
 // Example: Find users with the name 'Bob' using the partitioned hash-based index with MD5 hashing
 const resultsPartitioned = findByFieldPartitioned(
-  MyNoSQLDB.users[1], // Example accessing a specific partition
-  MyNoSQLDB.hashIndexPartitions[1], // Example accessing the index of a specific partition
+  MyNoSQLDB.users,
+  MyNoSQLDB.hashIndexPartitions, // Pass the array of file paths here
   'name',
   'Bob'
 );

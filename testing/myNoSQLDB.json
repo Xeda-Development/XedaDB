@@ -1,55 +1,9 @@
 {
-  "users": [
-    [
-      {
-        "id": 3,
-        "name": "Charlie",
-        "age": 22
-      }
-    ],
-    [
-      {
-        "id": 2,
-        "name": "Bob",
-        "age": 30
-      }
-    ],
-    [
-      {
-        "id": 1,
-        "name": "Alice",
-        "age": 25
-      }
-    ]
-  ],
+  "users": [],
   "indexByName": {},
   "hashIndexPartitions": [
-    [
-      {
-        "ea2bfa79cd221f1e88a9bf39ea155cd8": [
-          0
-        ]
-      },
-      {},
-      {}
-    ],
-    [
-      {},
-      {
-        "2fc1c0beb992cd7096975cfebf9d5c3b": [
-          0
-        ]
-      },
-      {}
-    ],
-    [
-      {
-        "64489c85dc2fe0787b85cd87214b3810": [
-          0
-        ]
-      },
-      {},
-      {}
-    ]
+    "partition_0.json",
+    "partition_1.json",
+    "partition_2.json"
   ]
 }
