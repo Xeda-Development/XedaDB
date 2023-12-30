@@ -63,7 +63,7 @@ function getOption(name, envName) {
   var res;
   if (config[name]) res = config[name];
   if (process.env[envName]) {
-    console.log(`Option ${name} is overwritten by env variable ${envName}`);
+    console.log(`> Option ${name} is overwritten by env variable ${envName}`);
     res = process.env[envName];
   }
   return res;
