@@ -36,8 +36,6 @@ class DBClient {
     }
 
     onData(data) {
-        // console.log(`> [${this.ID}] Got data from ${this.req.ip}: ${JSON.stringify(data)}`);
-
         if (data[0] == 'AUTH') {
             var password = data[1][0];
             var ServerPasss = this.getOption('password');
@@ -60,7 +58,6 @@ class DBClient {
             this.cmdId,
             args
         ]));
-        // console.log(`> Sent packet ${packetId} (${this.cmdId}) to ${this.ID}`)
     }
 
 
