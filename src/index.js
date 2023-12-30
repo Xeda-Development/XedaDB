@@ -59,6 +59,14 @@ app.on('error', (error) => {
   handleError('Failed to start TCP server', error, true)
 });
 
-app.listen(config.server.port, config.server.ip, () => {
-  console.log(`Server listening on ${config.server.ip}:${config.server.port}`);
+var ip = config.server.ip;
+var port = config.server.port;
+
+if (process.env.SERVER_IP) ip = process.env.SERVER_IP;
+if (process.env.SERVER_PORT) port = process.env.SERVER_PORT;
+
+console.log(`> Going to listen on ${ip}:${port}`)
+
+app.listen(port, ip, () => {
+  console.log(`Server listening on ${ip}:${port}`);
 });
