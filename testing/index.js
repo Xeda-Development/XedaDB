@@ -1,18 +1,11 @@
 const fs = require("fs");
+const pack = require("msgpack-lite");
 
 // Initial partition size limit
 const partitionSizeLimit = 2; // For example purposes, set a small partition limit
 
 // Sample database array
-let database = [
-  { id: 1, name: "John", age: 25 },
-  { id: 2, name: "Alice", age: 30 },
-  { id: 3, name: "Bob", age: 28 },
-  { id: 4, name: "Eve", age: 26 },
-  { id: 5, name: "Mark", age: 32 },
-  // Additional entries might be added dynamically
-];
-
+let database = []; // Empty database
 // Index object to store references for quick access
 let index = {};
 
@@ -48,7 +41,7 @@ function saveToFile() {
     cache,
   };
 
-  fs.writeFileSync("database.json", JSON.stringify(dataToSave, null, 2));
+  fs.writeFileSync("database.json", pack.encode(dataToSave));
   console.log("Cache saved to file.");
 }
 
@@ -64,8 +57,8 @@ function loadIndexFromPartitions() {
   indexKeys.forEach((key) => {
     const indexPartitionFilename = `index_partition_${key}.json`;
     if (fs.existsSync(indexPartitionFilename)) {
-      const data = fs.readFileSync(indexPartitionFilename, "utf8");
-      const parsedData = JSON.parse(data);
+      const data = fs.readFileSync(indexPartitionFilename);
+      const parsedData = pack.decode(data);
       index[key] = parsedData;
       console.log(`Index partition for ${key} loaded from ${indexPartitionFilename}`);
     }
@@ -84,7 +77,7 @@ function queryByProperty(property, value) {
     const partitions = index[property][value];
     const results = partitions.flatMap(partitionNumber => {
       const partitionFilename = `partition_${partitionNumber}.json`;
-      const partitionData = JSON.parse(fs.readFileSync(partitionFilename, 'utf8'));
+      const partitionData = pack.decode(fs.readFileSync(partitionFilename));
       return partitionData.filter(entry => entry[property] === value);
     });
 
@@ -129,7 +122,7 @@ function partitionDatabase() {
   // Save each partition to a separate file
   partitions.forEach((partition, index) => {
     const partitionFilename = `partition_${index + 1}.json`;
-    fs.writeFileSync(partitionFilename, JSON.stringify(partition));
+    fs.writeFileSync(partitionFilename, pack.encode(partition));
     console.log(`Partition ${index + 1} saved to ${partitionFilename}`);
   });
 }
@@ -152,7 +145,7 @@ function partitionIndex() {
     }
 
     const indexPartitionFilename = `index_partition_${key}.json`;
-    fs.writeFileSync(indexPartitionFilename, JSON.stringify(indexPartitions));
+    fs.writeFileSync(indexPartitionFilename, pack.encode(indexPartitions));
     console.log(`Index partition for ${key} saved to ${indexPartitionFilename}`);
   });
 }
@@ -164,8 +157,8 @@ function loadPartitions() {
   let partitionFilename = `partition_${partitionIndex}.json`;
 
   while (fs.existsSync(partitionFilename)) {
-    const data = fs.readFileSync(partitionFilename, "utf8");
-    const parsedData = JSON.parse(data);
+    const data = fs.readFileSync(partitionFilename);
+    const parsedData = pack.decode(data);
     loadedPartitions.push(parsedData);
     console.log(`Partition ${partitionIndex} loaded from ${partitionFilename}`);
 
