@@ -31,6 +31,17 @@ There are multiple packettypes:
 | State   	| `ALL`                     |
 This packet is sent when the state of the clients changes.
 
+### PRE
+#### `CLIENTDATA`
+| KEY    	| VALUE         	        |
+|--------	|-------	                |
+| PacketID 	| `CLIENTDATA`           	    |
+| Mode   	| toClient                  |
+| State   	| `PRE`                     |
+This packet will send some data to the client:
+- ClientID
+- Current state
+- Todo: server date / version / uptime
 
 ## Links
 MessagePack:
