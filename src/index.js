@@ -62,8 +62,14 @@ app.on('error', (error) => {
 var ip = config.server.ip;
 var port = config.server.port;
 
-if (process.env.SERVER_IP) { ip = process.env.SERVER_IP; }
-if (process.env.SERVER_PORT) { port = process.env.SERVER_PORT; }
+if (process.env.SERVER_IP) {
+  // Todo: log something
+  ip = process.env.SERVER_IP;
+}
+if (process.env.SERVER_PORT) {
+  // Todo: log something
+  port = process.env.SERVER_PORT;
+}
 
 console.log(`> Going to listen on ${ip}:${port}`)
 
