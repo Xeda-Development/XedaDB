@@ -59,9 +59,6 @@ app.on('error', (error) => {
   handleError('Failed to start TCP server', error, true)
 });
 
-var ip = config.server_ip;
-var port = config.server_port;
-
 function getOption(name, envName) {
   var res;
   if (config[name]) res = config[name];
@@ -72,16 +69,8 @@ function getOption(name, envName) {
   return res;
 }
 
-console.log(getOption('server_port', 'SERVER_PORT'))
-
-if (process.env.SERVER_IP) {
-  // Todo: log something
-  ip = process.env.SERVER_IP;
-}
-if (process.env.SERVER_PORT) {
-  // Todo: log something
-  port = process.env.SERVER_PORT;
-}
+var ip = getOption('server_ip', 'SERVER_IP')
+var port = getOption('server_port', 'SERVER_PORT');
 
 console.log(`> Going to listen on ${ip}:${port}`)
 
