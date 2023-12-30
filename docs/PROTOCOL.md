@@ -2,16 +2,17 @@
 This document covers the network protocol
 
 ## Network
-| Key    	| Value 	|
-|--------	|-------	|
-| Method 	| TCP   	|
-| Port   	| 1895  	|
+| Key    	| Value 	    |
+|--------	|-------	    |
+| Method 	| Websockets   	|
+| Port   	| 1895  	    |
 
 ## Structure
 XedaDB uses a simple JSON-like protocol using MessagePack [#1](#links).
 All packets sent, are lists (arrays).
 The first item in the array (`data[0]`) is the action.
-The second item (`data[1]`) is a list of all arguments.
+The second item (`data[1]`) is the packet ID. This is just a simple number that increments each time. This can be used for ordering packets.
+The third item (`data[2]`) is a list of all arguments.
 
 ## Packets
 There are multiple packettypes:
