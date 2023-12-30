@@ -110,17 +110,29 @@ function findByFieldPartitioned(collection, partitionFiles, fieldName, value) {
     console.log('Partition file path:', partitionFilePath); // Debug: Log partition file path
     const partitionData = loadPartitionFromDisk(partitionFilePath);
     console.log('Partition data:', partitionData); // Debug: Log partition data
-    const entries = partitionData[hash];
-    console.log('Entries in partition:', entries); // Debug: Log entries in the partition
-  
-    if (entries) {
-      // Return the matching entries
-      const results = entries.map((index) => collection[index]);
-      return results;
-    } else {
-      // No matching entries found
-      return [];
+    var entries;
+    entries = [];
+
+    for(let i = 0; i < partitionData.length; i++) {
+        var en = partitionData[i];
+        if (en[fieldName] == value) {
+            entries.push(en);
+        }
     }
+
+    return entries;
+
+    // const entries = partitionData[hash];
+    // console.log('Entries in partition:', entries); // Debug: Log entries in the partition
+  
+    // if (entries) {
+    //   // Return the matching entries
+    //   const results = entries.map((index) => collection[index]);
+    //   return results;
+    // } else {
+    //   // No matching entries found
+    //   return [];
+    // }
   }
   
 
