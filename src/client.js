@@ -41,7 +41,9 @@ class DBClient {
             case 'AUTH':
                 this.handleAuth(data[1]);
                 break;
-    
+            case 'ACK':
+                // ToDo: make a proper ack system
+                break;
             default:
                 console.log(`> Unhandled command ${command} received from ${this.ID}`);
                 break;
