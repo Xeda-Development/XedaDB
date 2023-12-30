@@ -81,6 +81,7 @@ function createEntry(entry) {
   // Check if the partition limit is exceeded, then split the database
   if (database.length > partitionSizeLimit) {
     partitionDatabase();
+    partitionIndex(); // Partition the index after partitioning the database
   }
 
   createIndex("name");
@@ -111,6 +112,34 @@ function partitionDatabase() {
   });
 }
 
+// Function to partition the index and save partitions to disk
+function partitionIndex() {
+  const indexKeys = Object.keys(index);
+
+  indexKeys.forEach((key) => {
+    const currentKeyIndex = index[key];
+    const keys = Object.keys(currentKeyIndex);
+    const indexPartitions = [];
+
+    keys.forEach((innerKey) => {
+      const entries = currentKeyIndex[innerKey];
+      const numEntries = entries.length;
+      const numIndexPartitions = Math.ceil(numEntries / partitionSizeLimit);
+
+      for (let i = 0; i < numIndexPartitions; i++) {
+        const start = i * partitionSizeLimit;
+        const end = Math.min(start + partitionSizeLimit, numEntries);
+        const partitionedEntries = entries.slice(start, end);
+        indexPartitions.push({ [innerKey]: partitionedEntries });
+      }
+    });
+
+    const indexPartitionFilename = `index_partition_${key}.json`;
+    fs.writeFileSync(indexPartitionFilename, JSON.stringify(indexPartitions));
+    console.log(`Index partition for ${key} saved to ${indexPartitionFilename}`);
+  });
+}
+
 // Function to load partitions from disk
 function loadPartitions() {
   const loadedPartitions = [];
@@ -131,20 +160,15 @@ function loadPartitions() {
 }
 
 // Trigger partitioning after adding an entry to the database
-
-
-// Save the index and cache to disk
-
-
-// Load partitions from disk
-const loadedPartitions = loadPartitions();
-console.log("Loaded partitions:", loadedPartitions);
-
 createEntry({ id: Date.now(), name: "Pizza", age: 29 }); // Create
-
 
 console.log('query:', queryByProperty('name', 'Pizza'));
 
+// Save the partitions to disk
+partitionDatabase();
 
-partitionDatabase()
+// Save the index partitions to disk
+partitionIndex();
+
+// Save the index and cache to disk
 saveToFile();
