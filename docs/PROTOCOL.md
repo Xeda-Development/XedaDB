@@ -43,6 +43,14 @@ This packet will send some data to the client:
 - Current state
 - Todo: server date / version / uptime
 
+#### `AUTH`
+| KEY    	| VALUE         	        |
+|--------	|-------	                |
+| PacketID 	| `AUTH`           	    |
+| Mode   	| toClient                  |
+| State   	| `PRE`                     |
+Asks the client to authenticate.
+
 ## Links
 MessagePack:
 https://msgpack.org/
