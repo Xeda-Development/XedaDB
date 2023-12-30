@@ -1,8 +1,11 @@
 const fs = require('fs');
 const yaml = require('js-yaml');
-const net = require('net');
 const pack = require("msgpack-lite");
 const Client = require('./client');
+
+var express = require('express');
+var app = express();
+require('express-ws')(app);
 
 const CONSTANTS = require('./CONSTANTS');
 
@@ -27,42 +30,35 @@ function loadConfig(filePath) {
   }
 }
 
-function startTCPServer(ip, port) {
-  const server = net.createServer((socket) => {
-    var IP = `${socket.address().address}:${socket.address().port}`;
-    console.log(IP + ' Client connected');
-
-    var s;
-    s = this;
-
-    const client = new Client(s, socket);
-
-    socket.on('data', (data) => {
-      try {
-        data = pack.decode(data);
-
-        client.onData(data);
-      } catch(e) {
-        if (socket.destroyed) return;
-        // socket.write('Error: ' + String(e));
-        // socket.end();
-      }
-    });
-
-    socket.on('end', () => {
-      console.log('Client '+IP+' closed');
-    });
-  });
-
-  server.on('error', (error) => {
-    handleError('Failed to start TCP server', error, true)
-  });
-
-  server.listen(port, ip, () => {
-    console.log(`Server listening on ${ip}:${port}`);
-  });
-}
-
 const config = loadConfig(CONSTANTS.ConfigPath);
 
-startTCPServer(config.server.ip, config.server.port);
+app.ws('/', function(ws, req) {
+  ws.req = req;
+  var IP = req.ip;
+
+  console.log(IP + ' Client connected');
+
+  const client = new Client(app, ws);
+
+  ws.on('close', () => {
+    console.log('Client '+IP+' closed');
+  });
+
+  ws.on('message', function(data) {
+    try {
+      data = pack.decode(data);
+
+      client.onData(data);
+    } catch(e) {
+      ws.send('Error: ' + String(e))
+    }
+  });
+});
+
+app.on('error', (error) => {
+  handleError('Failed to start TCP server', error, true)
+});
+
+app.listen(config.server.port, config.server.ip, () => {
+  console.log(`Server listening on ${config.server.ip}:${config.server.port}`);
+});
