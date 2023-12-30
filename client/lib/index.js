@@ -58,14 +58,11 @@ class Client {
         });
 
         log(`> Connected to ${this.url}`);
-
-        // this.conn.write(pack.encode('ACK', ['CONN']));
     }
 
     async onData(data) {
         console.log('data: ', data);
-        // this.conn.write(pack.encode('ACK', [data[0]]))
-        this.client.send(pack.encode(['ACK', [data[1], data[0]]]))
+        this.client.send(pack.encode(['ACK', [data[1], data[0]]])); // At the moment, this is unused by the server
     }
 }
 
