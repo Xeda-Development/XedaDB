@@ -140,10 +140,10 @@ function loadPartitions() {
 const loadedPartitions = loadPartitions();
 console.log("Loaded partitions:", loadedPartitions);
 
-createEntry({ id: 7, name: "Mau", age: 29 }); // Create
+createEntry({ id: Date.now(), name: "Pizza", age: 29 }); // Create
 
 
-console.log('query:', queryByProperty('name', 'Mau'));
+console.log('query:', queryByProperty('name', 'Pizza'));
 
 
 partitionDatabase()
