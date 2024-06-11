@@ -37,14 +37,14 @@ class DBClient {
     }
 
     onData(data) {
-        const command = data[0];
+        const command = Array(data).shift();
         switch (command) {
             case 'AUTH':
                 this.handleAuth(data[1]);
                 break;
-            case 'QUERY_ALL':
+            case 'GET':
                 if (!this.isAuthenticated || this.state !== 'DATA') return this.sendPacket('ERROR', ['INVALID_AUTH-STATE']);
-                this.queryAll();
+                this.getKey(data);
                 break;
             case 'ACK':
                 // ToDo: make a proper ack system
@@ -55,14 +55,11 @@ class DBClient {
         }
     }
 
-    async queryAll() {
+    async getKey(key) {
         try {
-            const basePath = this.getOption('storagePath');
-            const dataFilePath = `${basePath}/data.msgpack`;
-            const rawMsgPackData = await fs.readFile(dataFilePath);
-            const data = pack.decode(rawMsgPackData);
-
-            this.sendPacket('QUERY_ALL_RESULT', [data]);
+            data = key + 'val';
+            
+            this.sendPacket('GET', [data]);
         } catch (error) {
             console.error('Error querying data:', error);
             this.sendPacket('ERROR', ['QUERY_FAILED']);
